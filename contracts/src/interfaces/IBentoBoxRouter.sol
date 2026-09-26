@@ -20,6 +20,27 @@ struct BasketLeg {
     uint160 sqrtPriceLimitX96;
 }
 
+/// @notice One exact-input swap leg of a `rebalance` call. Unlike `BasketLeg`, the amount is
+/// an explicit value (the caller already knows exactly how much of an existing holding is
+/// over/under-weight) rather than a bps share of one shared input.
+struct SwapLeg {
+    /// @dev Pool must directly pair the swapped token with `hubToken`. `hooks` may be any
+    /// address — a hooked pool is just another `PoolKey` to this router (see `SlippageExceeded`).
+    PoolKey poolKey;
+    /// @dev true if this leg's INPUT currency is poolKey.currency0.
+    bool zeroForOne;
+    /// @dev Exact amount of the leg's input currency to swap.
+    uint256 amountIn;
+    /// @dev Minimum acceptable output for this leg. If the actual output is below this — e.g.
+    /// because a pool's (possibly dynamic-fee) hook charges up to 100% fee on this swap — the
+    /// ENTIRE transaction reverts. This is the fail-safe: a malicious or compromised hook can
+    /// make one leg return ~0, but it can never make the router accept less than the caller's
+    /// own floor, and the all-or-nothing revert means no other leg executes either.
+    uint128 amountOutMinimum;
+    /// @dev Pass 0 to disable extra price-limit capping beyond `amountOutMinimum`.
+    uint160 sqrtPriceLimitX96;
+}
+
 interface IBentoBoxRouter {
     /// @notice Emitted once per successful split, with the per-leg output token and amount.
     event SplitExecuted(
@@ -28,6 +49,17 @@ interface IBentoBoxRouter {
         uint256 amountIn,
         address[] tokensOut,
         uint256[] amountsOut
+    );
+
+    /// @notice Emitted once per successful rebalance, with the sold/bought tokens and amounts.
+    event RebalanceExecuted(
+        address indexed user,
+        address indexed hubToken,
+        address[] tokensSold,
+        uint256[] amountsSold,
+        address[] tokensBought,
+        uint256[] amountsBought,
+        int256 netHubDelta // positive: hub currency refunded to user; negative: pulled from user
     );
 
     error DeadlineExpired();
@@ -46,4 +78,21 @@ interface IBentoBoxRouter {
     function splitSwap(address tokenIn, uint256 amountIn, BasketLeg[] calldata legs, uint256 deadline)
         external
         returns (uint256[] memory amountsOut);
+
+    /// @notice Rebalance an existing basket of holdings back toward target weights: sell some
+    /// tokens for `hubToken`, then spend that `hubToken` buying others — all in one atomic
+    /// transaction, using the same direct bWETH-paired pools `splitSwap` already routes
+    /// through (bWETH is the "hub" every basket token has a pool against).
+    /// @dev Every sell/buy leg's input token must be pre-approved to this router. The router
+    /// nets the hub currency across all legs itself: if sells raised more hub currency than
+    /// buys spent, the surplus is refunded to `msg.sender`; if buys need more than the sells
+    /// raised, the shortfall is pulled from `msg.sender` (requires `hubToken` approval too).
+    /// Reverts the ENTIRE transaction if any leg's output breaches its `amountOutMinimum` —
+    /// including the case where a pool's hook has cranked its dynamic LP fee up to 100%,
+    /// which would otherwise silently siphon the whole leg's value into the pool.
+    /// @return soldAmountsOut hub currency received per sell leg, in the same order as `sellLegs`.
+    /// @return boughtAmountsOut token amount received per buy leg, in the same order as `buyLegs`.
+    function rebalance(address hubToken, SwapLeg[] calldata sellLegs, SwapLeg[] calldata buyLegs, uint256 deadline)
+        external
+        returns (uint256[] memory soldAmountsOut, uint256[] memory boughtAmountsOut);
 }

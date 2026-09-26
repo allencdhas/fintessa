@@ -5,7 +5,14 @@ libs = ["lib"]
 solc_version = "0.8.26"
 evm_version = "cancun"
 optimizer = true
-optimizer_runs = 44444444
+# Was 44444444. At that (and any value above ~1000), via-ir tries to aggressively
+# inline/duplicate v4-core's own Pool.swap() internals across every poolManager.swap() call
+# site in this router, which overflows a Yul stack-depth limit deep inside v4-core's library
+# code once the router has enough distinct call sites (added by `rebalance`) — confirmed by
+# bisection: solc reports "Variable ... is 1 too deep in the stack" inside v4-core's Pool.sol
+# at runs=1000, and a bare internal compiler error (no useful diagnostic) at higher runs.
+# 200 is solc's own standard default and reliably avoids it.
+optimizer_runs = 200
 via_ir = true
 gas_limit = "300000000"
 bytecode_hash = "none"
