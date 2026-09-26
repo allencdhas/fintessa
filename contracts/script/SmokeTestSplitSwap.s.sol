@@ -33,7 +33,7 @@ contract SmokeTestSplitSwap is Script {
         PoolKey memory keyDai = _readPoolKey(json, ".poolDai");
         PoolKey memory keyLink = _readPoolKey(json, ".poolLink");
 
-        uint256 userKey = vm.envOr("SMOKE_USER_PRIVATE_KEY", uint256(0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690));
+        uint256 userKey = vm.envOr("SMOKE_USER_PRIVATE_KEY", uint256(0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d));
         address user = vm.addr(userKey);
 
         uint256 amountIn = 1 ether;
