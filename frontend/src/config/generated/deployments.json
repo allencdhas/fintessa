@@ -1,0 +1,42 @@
+{
+  "31337": {
+    "bDAI": "0xD84379CEae14AA33C123Af12424A37803F885889",
+    "bLINK": "0x2B0d36FACD61B71CC05ab8F3D2355ec3631C0dd5",
+    "bUNI": "0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d",
+    "bUSDC": "0xBEc49fA140aCaA83533fB00A2BB19bDdd0290f25",
+    "bWETH": "0x4EE6eCAD1c2Dae9f525404De8555724e3c35d07B",
+    "chainId": 31337,
+    "lpRouter": "0xC9a43158891282A2B1475592D5719c001986Aaec",
+    "poolDai": {
+      "currency0": "0x4EE6eCAD1c2Dae9f525404De8555724e3c35d07B",
+      "currency1": "0xD84379CEae14AA33C123Af12424A37803F885889",
+      "fee": 3000,
+      "hooks": "0x0000000000000000000000000000000000000000",
+      "tickSpacing": 60
+    },
+    "poolLink": {
+      "currency0": "0x2B0d36FACD61B71CC05ab8F3D2355ec3631C0dd5",
+      "currency1": "0x4EE6eCAD1c2Dae9f525404De8555724e3c35d07B",
+      "fee": 3000,
+      "hooks": "0x0000000000000000000000000000000000000000",
+      "tickSpacing": 60
+    },
+    "poolManager": "0x172076E0166D1F9Cc711C77Adf8488051744980C",
+    "poolUni": {
+      "currency0": "0x4EE6eCAD1c2Dae9f525404De8555724e3c35d07B",
+      "currency1": "0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d",
+      "fee": 3000,
+      "hooks": "0x0000000000000000000000000000000000000000",
+      "tickSpacing": 60
+    },
+    "poolUsdc": {
+      "currency0": "0x4EE6eCAD1c2Dae9f525404De8555724e3c35d07B",
+      "currency1": "0xBEc49fA140aCaA83533fB00A2BB19bDdd0290f25",
+      "fee": 3000,
+      "hooks": "0x0000000000000000000000000000000000000000",
+      "tickSpacing": 60
+    },
+    "quoter": "0x1c85638e118b37167e9298c2268758e058DdfDA0",
+    "router": "0x46b142DD1E924FAb83eCc3c08e4D46E82f005e0E"
+  }
+}

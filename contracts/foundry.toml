@@ -1,0 +1,18 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.26"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 44444444
+via_ir = true
+gas_limit = "300000000"
+bytecode_hash = "none"
+fs_permissions = [{ access = "read-write", path = "./" }]
+
+[rpc_endpoints]
+base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
+anvil = "http://127.0.0.1:8545"
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
