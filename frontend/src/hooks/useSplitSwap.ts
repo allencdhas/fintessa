@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import { erc20Abi, parseEventLogs, type Address, type Hex } from "viem";
+import { erc20Abi, formatUnits, parseEventLogs, type Address, type Hex } from "viem";
 
 import { bentoBoxRouterAbi, type ChainDeployment, getPoolKeyForToken, getTokenAddress, type BasketTokenSymbol } from "@/config/contracts";
 import { TOTAL_BPS } from "@/lib/basket";
@@ -32,6 +32,16 @@ export type SplitReceipt = {
   amountsOut: { symbol: BasketTokenSymbol; amountOut: bigint }[];
 };
 
+export type SplitLogLevel = "info" | "pending" | "success" | "error";
+
+export type SplitLogEntry = {
+  id: string;
+  timestamp: number;
+  level: SplitLogLevel;
+  message: string;
+  txHash?: Hex;
+};
+
 const SLIPPAGE_BPS = 500n; // 5% default tolerance — generous on purpose (see build plan §2).
 
 export function useSplitSwap(deployment: ChainDeployment | undefined) {
@@ -42,11 +52,20 @@ export function useSplitSwap(deployment: ChainDeployment | undefined) {
   const [status, setStatus] = useState<SplitSwapStatus>("idle");
   const [error, setError] = useState<Error | null>(null);
   const [receipt, setReceipt] = useState<SplitReceipt | null>(null);
+  const [log, setLog] = useState<SplitLogEntry[]>([]);
+  const logSeq = useRef(0);
+
+  const appendLog = useCallback((level: SplitLogLevel, message: string, txHash?: Hex) => {
+    logSeq.current += 1;
+    const entry: SplitLogEntry = { id: `${Date.now()}-${logSeq.current}`, timestamp: Date.now(), level, message, txHash };
+    setLog((prev) => [...prev, entry]);
+  }, []);
 
   const reset = useCallback(() => {
     setStatus("idle");
     setError(null);
     setReceipt(null);
+    setLog([]);
   }, []);
 
   const execute = useCallback(
@@ -54,12 +73,15 @@ export function useSplitSwap(deployment: ChainDeployment | undefined) {
       if (!deployment || !address || !publicClient) {
         setError(new Error("Wallet not connected"));
         setStatus("error");
+        appendLog("error", "Wallet not connected.");
         return;
       }
       try {
         setError(null);
         setReceipt(null);
+        setLog([]);
         setStatus("checking-allowance");
+        appendLog("pending", "Checking current bWETH allowance for the router…");
 
         const allowance = await publicClient.readContract({
           address: deployment.bWETH,
@@ -70,7 +92,9 @@ export function useSplitSwap(deployment: ChainDeployment | undefined) {
 
         let approveTxHash: Hex | undefined;
         if (allowance < amountInWei) {
+          appendLog("info", `Allowance insufficient (${formatUnits(allowance, 18)} < ${formatUnits(amountInWei, 18)}) — requesting approval.`);
           setStatus("awaiting-approve-signature");
+          appendLog("pending", "Waiting for approve signature in wallet…");
           approveTxHash = await writeContractAsync({
             address: deployment.bWETH,
             abi: erc20Abi,
@@ -78,7 +102,11 @@ export function useSplitSwap(deployment: ChainDeployment | undefined) {
             args: [deployment.router, amountInWei],
           });
           setStatus("approving");
+          appendLog("pending", "Approve transaction submitted, waiting for confirmation…", approveTxHash);
           await publicClient.waitForTransactionReceipt({ hash: approveTxHash });
+          appendLog("success", "Approval confirmed.", approveTxHash);
+        } else {
+          appendLog("success", "Allowance already sufficient — skipping approval.");
         }
 
         const routerLegs = legs.map((leg) => {
@@ -108,6 +136,7 @@ export function useSplitSwap(deployment: ChainDeployment | undefined) {
         const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineSeconds);
 
         setStatus("awaiting-split-signature");
+        appendLog("pending", `Waiting for split signature (${legs.length} leg${legs.length === 1 ? "" : "s"})…`);
         const splitTxHash = await writeContractAsync({
           address: deployment.router,
           abi: bentoBoxRouterAbi,
@@ -116,6 +145,7 @@ export function useSplitSwap(deployment: ChainDeployment | undefined) {
         });
 
         setStatus("splitting");
+        appendLog("pending", "Split transaction submitted, waiting for confirmation…", splitTxHash);
         const splitReceipt = await publicClient.waitForTransactionReceipt({ hash: splitTxHash });
 
         const events = parseEventLogs({
@@ -136,15 +166,20 @@ export function useSplitSwap(deployment: ChainDeployment | undefined) {
           });
         }
 
+        const summary = amountsOut.map(({ symbol, amountOut }) => `${Number(formatUnits(amountOut, 18)).toLocaleString(undefined, { maximumFractionDigits: 4 })} ${symbol}`).join(", ");
+        appendLog("success", `Split confirmed — received ${summary || "basket"}. All legs settled atomically.`, splitTxHash);
+
         setReceipt({ approveTxHash, splitTxHash, amountsOut });
         setStatus("success");
       } catch (e) {
-        setError(e instanceof Error ? e : new Error(String(e)));
+        const err = e instanceof Error ? e : new Error(String(e));
+        setError(err);
         setStatus("error");
+        appendLog("error", err.message);
       }
     },
-    [deployment, address, publicClient, writeContractAsync]
+    [deployment, address, publicClient, writeContractAsync, appendLog]
   );
 
-  return { execute, reset, status, error, receipt };
+  return { execute, reset, status, error, receipt, log };
 }
