@@ -64,9 +64,15 @@ export function NewSplitDialog({ deployment, onSplitConfirmed }: { deployment: C
 
   async function handleSplit() {
     if (!amountInWei) return;
+    // A leg at exactly 0% still reaches the pool as a zero-amount swap, which v4's
+    // PoolManager hard-reverts on (SwapAmountCannotBeZero) — drop it instead. Dropping a
+    // 0-weight leg never breaks the "must sum to 10,000" invariant, since the remaining
+    // legs already account for the full 100% between them.
     await execute(
       amountInWei,
-      active.map((symbol) => ({ symbol, weightBps: weights[symbol] ?? 0, quotedAmountOut: quotes[symbol] }))
+      active
+        .map((symbol) => ({ symbol, weightBps: weights[symbol] ?? 0, quotedAmountOut: quotes[symbol] }))
+        .filter((leg) => leg.weightBps > 0)
     );
   }
 
