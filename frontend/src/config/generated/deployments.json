@@ -38,5 +38,45 @@
     },
     "quoter": "0x1c85638e118b37167e9298c2268758e058DdfDA0",
     "router": "0x46b142DD1E924FAb83eCc3c08e4D46E82f005e0E"
+  },
+  "84532": {
+    "bDAI": "0x75a4A91101D3C17CF7D5DF3E2498a991Ab007904",
+    "bLINK": "0xBbc7C4A32bC21e65F4AC0F7657c13e203eDE40B2",
+    "bUNI": "0x545514CE95b381F22B8196FF65b69Ce8C7E13A3c",
+    "bUSDC": "0x6484b7Ada7DEd6908FC09171065C5c1f9bE435ef",
+    "bWETH": "0xDC479E33e992ae6B53a19011c9dA741F9ee6274D",
+    "chainId": 84532,
+    "lpRouter": "0x038B840703Ae5fC4736Ef5696A2d05A619FE1C58",
+    "poolDai": {
+      "currency0": "0x75a4A91101D3C17CF7D5DF3E2498a991Ab007904",
+      "currency1": "0xDC479E33e992ae6B53a19011c9dA741F9ee6274D",
+      "fee": 3000,
+      "hooks": "0x0000000000000000000000000000000000000000",
+      "tickSpacing": 60
+    },
+    "poolLink": {
+      "currency0": "0xBbc7C4A32bC21e65F4AC0F7657c13e203eDE40B2",
+      "currency1": "0xDC479E33e992ae6B53a19011c9dA741F9ee6274D",
+      "fee": 3000,
+      "hooks": "0x0000000000000000000000000000000000000000",
+      "tickSpacing": 60
+    },
+    "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408",
+    "poolUni": {
+      "currency0": "0x545514CE95b381F22B8196FF65b69Ce8C7E13A3c",
+      "currency1": "0xDC479E33e992ae6B53a19011c9dA741F9ee6274D",
+      "fee": 3000,
+      "hooks": "0x0000000000000000000000000000000000000000",
+      "tickSpacing": 60
+    },
+    "poolUsdc": {
+      "currency0": "0x6484b7Ada7DEd6908FC09171065C5c1f9bE435ef",
+      "currency1": "0xDC479E33e992ae6B53a19011c9dA741F9ee6274D",
+      "fee": 3000,
+      "hooks": "0x0000000000000000000000000000000000000000",
+      "tickSpacing": 60
+    },
+    "quoter": "0x626603586454A489eFDAEc80CD1Bb3031bB34051",
+    "router": "0xb354f97171F03B48ef587df14d209CEDd1bA3F35"
   }
 }
