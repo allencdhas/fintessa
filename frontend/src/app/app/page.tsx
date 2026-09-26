@@ -2,10 +2,10 @@
 
 import { useAccount } from "wagmi";
 import { formatUnits } from "viem";
-import { RefreshCw, ArrowUpRight } from "lucide-react";
+import { RefreshCw, ArrowUpRight, Plus } from "lucide-react";
 
 import { TokenBadge } from "@/components/TokenBadge";
-import { NewSplitDialog } from "@/components/NewSplitDialog";
+import { BasketDialog } from "@/components/BasketDialog";
 import { StatCard } from "@/components/StatCard";
 import { Sparkline } from "@/components/Sparkline";
 import { SplitHistoryList } from "@/components/SplitHistoryList";
@@ -77,7 +77,28 @@ export default function AppPage() {
           </div>
           <div className="flex items-center gap-2">
             <WalletConnectButton />
-            <NewSplitDialog deployment={deployment} onSplitConfirmed={() => refetchHistory()} />
+            <BasketDialog
+              deployment={deployment}
+              defaultTab="rebalance"
+              onSplitConfirmed={() => refetchHistory()}
+              onRebalanceConfirmed={() => refetchHistory()}
+              trigger={
+                <Button variant="outline" className="rounded-full">
+                  <RefreshCw className="size-4" /> Rebalance
+                </Button>
+              }
+            />
+            <BasketDialog
+              deployment={deployment}
+              defaultTab="split"
+              onSplitConfirmed={() => refetchHistory()}
+              onRebalanceConfirmed={() => refetchHistory()}
+              trigger={
+                <Button className="rounded-full">
+                  <Plus className="size-4" /> New Split
+                </Button>
+              }
+            />
           </div>
         </div>
 
