@@ -1,6 +1,6 @@
 import { createConfig, http } from "wagmi";
 import { injected } from "wagmi/connectors";
-import { mock } from "@wagmi/core";
+import { mock } from "wagmi/connectors";
 
 import { anvilLocal, baseSepolia } from "./chains";
 
@@ -9,7 +9,7 @@ import { anvilLocal, baseSepolia } from "./chains";
  * private key is public knowledge (printed by every `anvil` boot) — this is only ever
  * used against the local Anvil chain, never a real network.
  */
-export const ANVIL_DEV_WALLET_ADDRESS = "0x70997970C51812dc3A010C7d01b50e0d17dc79C" as const;
+export const ANVIL_DEV_WALLET_ADDRESS = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" as const;
 
 /**
  * The wagmi "mock" connector forwards unhandled JSON-RPC methods (including
