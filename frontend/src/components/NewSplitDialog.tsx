@@ -94,6 +94,9 @@ export function NewSplitDialog({ deployment, onSplitConfirmed }: { deployment: C
         {log.length === 0 ? (
           <div className="space-y-5">
             <AmountInput value={amountInStr} onChange={setAmountInStr} wethAddress={deployment.bWETH} />
+            <p className="-mt-3 text-xs text-muted-foreground">
+              This single bWETH amount is what gets divided below — it isn&apos;t added again per token.
+            </p>
 
             <Separator />
 
@@ -105,7 +108,9 @@ export function NewSplitDialog({ deployment, onSplitConfirmed }: { deployment: C
             <Separator />
 
             <div className="space-y-2">
-              <p className="text-sm font-medium">You&apos;ll receive (estimated)</p>
+              <p className="text-sm font-medium">
+                You&apos;ll receive (estimated) — from that {hasAmount ? amountInStr : "…"} bWETH split {active.length} ways
+              </p>
               {active.map((symbol) => {
                 const token = BASKET_TOKENS.find((t) => t.symbol === symbol)!;
                 const quoted = quotes[symbol];
