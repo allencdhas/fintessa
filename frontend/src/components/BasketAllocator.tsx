@@ -54,6 +54,8 @@ export function BasketAllocator({
             key={preset.name}
             size="sm"
             variant="outline"
+            disabled={stretchEnabled}
+            title={stretchEnabled ? "Presets don't define a bUNI weight — turn off the 4th leg to use one, or use Reset to equal." : undefined}
             onClick={() => onChange({ ...weights, ...preset.weights } as BasketAllocation)}
           >
             {preset.name}
